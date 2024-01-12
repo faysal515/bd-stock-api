@@ -3,8 +3,11 @@
 This is an unofficial api which crawls data from dsebd. Please report issue if data not coming in. I'll try to lookup.
 
 [x] - Dhaka Stock Exchange
+
 [ ] - Chittagong Stock Exchange
+
 [ ] - Logging, DB support
+
 [ ] - Validation, Environment variable
 ## API Routes
 
@@ -34,15 +37,15 @@ This is an unofficial api which crawls data from dsebd. Please report issue if d
 
 Each stock data object in the response represents a player in the stock market game. Here's what each field tells us about its performance:
 
-- `#`: **The Rank** - Unique to each stock, like a player's jersey number.
-- `TRADING CODE`: **The Player Name** - The unique identifier of the stock in the market.
+
+- `TRADING CODE`: The unique identifier of the stock in the market.
 - `LTP*` (Last Traded Price): **The Current Score** - The latest price at which the stock was traded.
-- `HIGH`: **The Winning Streak** - The highest price at which the stock traded for the day.
-- `LOW`: **The Hurdle** - The lowest price for the stock in the day.
-- `CLOSEP*` (Closing Price): **The Final Whistle** - The price at which the stock ended the trading day.
+- `HIGH`:  The highest price at which the stock traded for the day.
+- `LOW`: The lowest price for the stock in the day.
+- `CLOSEP*` (Closing Price): The price at which the stock ended the trading day.
 - `YCP*` (Yesterday's Closing Price): **Yesterday's Score** - The final score from the previous day.
-- `CHANGE`: **The Points Gained/Lost** - How much the stock has gained or lost compared to the previous day.
-- `TRADE`: **Number of Matches** - Total number of trades for the stock.
-- `VALUE (mn)`: **The Prize Money** - Total monetary value of all trades in millions.
-- `VOLUME`: **The Cheer Squad** - The total number of shares that were traded.
+- `CHANGE`: How much the stock has gained or lost compared to the previous day.
+- `TRADE`: Total number of trades for the stock.
+- `VALUE (mn)`: Total monetary value of all trades in millions.
+- `VOLUME`: The total number of shares that were traded.
 
