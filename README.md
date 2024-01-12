@@ -2,13 +2,13 @@
 
 This is an unofficial api which crawls data from dsebd. Please report issue if data not coming in. I'll try to lookup.
 
-[x] - Dhaka Stock Exchange
+- [x] Dhaka Stock Exchange
 
-[ ] - Chittagong Stock Exchange
+- [ ] Chittagong Stock Exchange
 
-[ ] - Logging, DB support
+- [ ] Logging, DB support
 
-[ ] - Validation, Environment variable
+- [ ] Validation, Environment variable
 ## API Routes
 
 ### 1. Latest Stock Data
