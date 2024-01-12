@@ -1,0 +1,58 @@
+[
+  {
+    "number": "1",
+    "date": "2024-01-04",
+    "tradingCode": "GP",
+    "ltp": "286.6",
+    "high": "286.6",
+    "low": "286.6",
+    "openp": "286.6",
+    "closep": "286.6",
+    "ycp": "286.6",
+    "trade": "18",
+    "value": "0.191",
+    "volume": "666"
+  },
+  {
+    "number": "2",
+    "date": "2024-01-03",
+    "tradingCode": "GP",
+    "ltp": "286.6",
+    "high": "286.6",
+    "low": "286.6",
+    "openp": "286.6",
+    "closep": "286.6",
+    "ycp": "286.6",
+    "trade": "23",
+    "value": "0.265",
+    "volume": "924"
+  },
+  {
+    "number": "3",
+    "date": "2024-01-02",
+    "tradingCode": "GP",
+    "ltp": "286.6",
+    "high": "286.6",
+    "low": "286.6",
+    "openp": "286.6",
+    "closep": "286.6",
+    "ycp": "286.6",
+    "trade": "17",
+    "value": "0.26",
+    "volume": "907"
+  },
+  {
+    "number": "4",
+    "date": "2024-01-01",
+    "tradingCode": "GP",
+    "ltp": "286.6",
+    "high": "286.6",
+    "low": "286.6",
+    "openp": "286.6",
+    "closep": "286.6",
+    "ycp": "286.6",
+    "trade": "27",
+    "value": "0.391",
+    "volume": "1,364"
+  }
+]
