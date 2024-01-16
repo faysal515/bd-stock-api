@@ -1,5 +1,6 @@
 import axios from "../utils/axiosConfig";
 import { CheerioAPI, load as CheerioLoad } from "cheerio";
+import { DHAKA_STOCK_URLS } from "../env";
 import { Service } from "typedi";
 
 interface Quote {
@@ -65,13 +66,14 @@ export class StockDataService {
 
   async parseTableRows<T extends Record<string, any>>(
     $: CheerioAPI,
-    selector: string
+    selector: string,
+    skipFirstRow: boolean = true
   ): Promise<T[]> {
     const headers = this.getCurrentTradingCodes($);
     const data: T[] = [];
 
     $(selector).each((index, element) => {
-      // if (index === 0) return; // Skip the header row
+      if (index === 0 && skipFirstRow) return;
 
       const tds = $(element).find("td");
       let rowData: T = {} as T;
@@ -87,13 +89,13 @@ export class StockDataService {
     return data;
   }
   async getStockData(): Promise<any[]> {
-    const url = "https://dsebd.org/latest_share_price_scroll_l.php";
+    const url = DHAKA_STOCK_URLS.LATEST_DATA;
     const $ = await this.fetchAndParseHtml(url);
     return this.parseTableRows<any>($, "table.table-bordered tr");
   }
 
   async getDsexData(symbol: string | undefined): Promise<any[]> {
-    const url = "https://dsebd.org/dseX_share.php";
+    const url = DHAKA_STOCK_URLS.DSEX;
 
     try {
       const $ = await this.fetchAndParseHtml(url);
@@ -110,12 +112,26 @@ export class StockDataService {
       return [];
     }
   }
+
+  async getTop30(): Promise<any[]> {
+    const url = DHAKA_STOCK_URLS.TOP_30;
+
+    try {
+      const $ = await this.fetchAndParseHtml(url);
+      let data = await this.parseTableRows<any>($, "table.table-bordered tr");
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching DSEX data:", error);
+      return [];
+    }
+  }
   async getHistData(
     start: string,
     end: string,
     code = "All Instrument"
   ): Promise<any[]> {
-    const url = "https://dsebd.org/day_end_archive.php";
+    const url = DHAKA_STOCK_URLS.HISTORIACAL_DATA;
     const params = {
       startDate: start,
       endDate: end,
@@ -125,6 +141,6 @@ export class StockDataService {
     const fullUrl = `${url}?${new URLSearchParams(params).toString()}`;
 
     const $ = await this.fetchAndParseHtml(fullUrl);
-    return this.parseTableRows<any>($, "table.table-bordered tbody tr");
+    return this.parseTableRows<any>($, "table.table-bordered tbody tr", false);
   }
 }

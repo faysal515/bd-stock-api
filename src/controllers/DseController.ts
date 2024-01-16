@@ -3,7 +3,7 @@ import { Service } from "typedi";
 import { StockDataService } from "../services/DsePriceService"; // Adjust the path as necessary
 import { apiResponse } from "../utils/helpers";
 
-@JsonController("/v1/price")
+@JsonController("/v1/dse")
 @Service()
 export class PriceController {
   constructor(private stockDataService: StockDataService) {}
@@ -13,7 +13,7 @@ export class PriceController {
     return { message: "Hello World" };
   }
 
-  @Get("/stockdata")
+  @Get("/latest")
   async getStockData() {
     return apiResponse(await this.stockDataService.getStockData());
   }
@@ -23,7 +23,12 @@ export class PriceController {
     return apiResponse(await this.stockDataService.getDsexData(symbol));
   }
 
-  @Get("/histdata")
+  @Get("/top30")
+  async getTop30() {
+    return apiResponse(await this.stockDataService.getTop30());
+  }
+
+  @Get("/historical")
   async getHistData(
     @QueryParam("start") start: string,
     @QueryParam("end") end: string,

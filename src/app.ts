@@ -1,8 +1,9 @@
 import "reflect-metadata";
+import "dotenv/config";
 import express from "express";
 import { createExpressServer, useContainer } from "routing-controllers";
 import { Container } from "typedi";
-import { PriceController } from "./controllers/PriceController";
+import { PriceController } from "./controllers/DseController";
 import { GlobalErrorHandler } from "./middlewares/ErrorMiddleware";
 
 useContainer(Container);

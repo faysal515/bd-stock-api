@@ -8,24 +8,27 @@ This is an unofficial api which crawls data from dsebd. Please report issue if d
 
 - [ ] Logging, DB support
 
-- [ ] Validation, Environment variable
+- [ ] Validation
 ## API Routes
 
 ### 1. Latest Stock Data
-- **Endpoint:** `GET /v1/price/stockdata`
+- **Endpoint:** `GET /v1/dse/latest`
 - **Description:** Retrieves the latest stock market data.
 - **Parameters:** None
 
+### 2. TOP 30 Stock Data
+- **Endpoint:** `GET /v1/dse/top30`
+- **Description:** Retrieves the latest top 30 stock market data.
+- **Parameters:** None
+
 ### 2. DSEX Data
-- **Endpoint:** `GET /v1/price/dsexdata`
+- **Endpoint:** `GET /v1/dse/dsexdata`
 - **Description:** Fetches DSEX (Dhaka Stock Exchange) data.
 - **Optional Parameters:**
   - `symbol` (string): Filter data for a specific stock symbol.
-  - `retryCount` (number): Number of retry attempts for the request.
-  - `pause` (number): Pause duration between retries in seconds.
 
 ### #. Historical Stock Data
-- **Endpoint:** `GET /v1/price/histdata`
+- **Endpoint:** `GET /v1/dse/historical`
 - **Description:** Obtains historical data for stocks.
 - **Required Parameters:**
   - `start` (string): Start date for the historical data.
