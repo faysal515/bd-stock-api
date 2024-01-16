@@ -38,15 +38,12 @@ This is an unofficial api which crawls data from dsebd. Please report issue if d
 
 ## Data Fields Description
 
-Each stock data object in the response represents a player in the stock market game. Here's what each field tells us about its performance:
-
-
 - `TRADING CODE`: The unique identifier of the stock in the market.
 - `LTP*` (Last Traded Price): **The Current Score** - The latest price at which the stock was traded.
 - `HIGH`:  The highest price at which the stock traded for the day.
 - `LOW`: The lowest price for the stock in the day.
 - `CLOSEP*` (Closing Price): The price at which the stock ended the trading day.
-- `YCP*` (Yesterday's Closing Price): **Yesterday's Score** - The final score from the previous day.
+- `YCP*` (Yesterday's Closing Price)
 - `CHANGE`: How much the stock has gained or lost compared to the previous day.
 - `TRADE`: Total number of trades for the stock.
 - `VALUE (mn)`: Total monetary value of all trades in millions.
