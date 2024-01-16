@@ -21,13 +21,13 @@ This is an unofficial api which crawls data from dsebd. Please report issue if d
 - **Description:** Retrieves the latest top 30 stock market data.
 - **Parameters:** None
 
-### 2. DSEX Data
+### 3. DSEX Data
 - **Endpoint:** `GET /v1/dse/dsexdata`
 - **Description:** Fetches DSEX (Dhaka Stock Exchange) data.
 - **Optional Parameters:**
   - `symbol` (string): Filter data for a specific stock symbol.
 
-### #. Historical Stock Data
+### 4. Historical Stock Data
 - **Endpoint:** `GET /v1/dse/historical`
 - **Description:** Obtains historical data for stocks.
 - **Required Parameters:**
