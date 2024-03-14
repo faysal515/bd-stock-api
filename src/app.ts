@@ -5,6 +5,7 @@ import { createExpressServer, useContainer } from "routing-controllers";
 import { Container } from "typedi";
 import { PriceController } from "./controllers/DseController";
 import { GlobalErrorHandler } from "./middlewares/ErrorMiddleware";
+import cors from "cors";
 
 useContainer(Container);
 
@@ -12,6 +13,7 @@ const app = express();
 
 // Middleware for parsing JSON bodies
 app.use(express.json());
+app.use(cors());
 
 // Create Express server with routing-controllers
 const expressApp = createExpressServer({
