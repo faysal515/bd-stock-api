@@ -60,28 +60,149 @@
 
     /* ── MOVERS STRIP ── */
     .movers {
-      display: flex; gap: 1px;
-      background: var(--border); border: 1px solid var(--border);
-      border-radius: 10px; overflow: hidden; margin-bottom: 28px;
+      display: flex;
+      gap: 14px;
+      margin-bottom: 28px;
     }
     .mover {
-      flex: 1; background: var(--surface); padding: 14px 18px;
-      cursor: pointer; transition: background 0.12s;
-      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      flex: 1;
+      min-width: 0;
+      background: #ffffff;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 14px;
+      padding: 20px 22px;
+      min-height: 120px;
+      cursor: pointer;
+      display: flex;
+      align-items: stretch;
+      box-shadow: none;
+      transition: border-color 0.18s, box-shadow 0.18s, transform 0.14s, background 0.18s;
     }
-    .mover:hover { background: #fafafa; }
-    .mover-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-3); margin-bottom: 3px; }
-    .mover-sym { font-size: 14px; font-weight: 700; letter-spacing: -0.2px; }
-    .mover-price { font-family: var(--mono); font-size: 12px; color: var(--text-2); margin-top: 1px; }
-    .mover-chg { font-family: var(--mono); font-size: 18px; font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; }
+    .mover:hover {
+      background: linear-gradient(165deg, #ffffff 0%, #f7f8fa 100%);
+      border-color: rgba(0,0,0,0.09);
+      box-shadow:
+        0 2px 4px rgba(0,0,0,0.05),
+        0 12px 28px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+    .mover--gainer:hover {
+      background: linear-gradient(165deg, #f4fbf7 0%, #ecf7f0 100%);
+      border-color: rgba(0, 158, 82, 0.22);
+      box-shadow:
+        0 2px 6px rgba(0, 158, 82, 0.08),
+        0 14px 32px rgba(0, 158, 82, 0.1);
+    }
+    .mover--gainer .mover-tag { color: rgba(0, 158, 82, 0.62); }
+    .mover--loser:hover {
+      background: linear-gradient(165deg, #fff8f8 0%, #fcefed 100%);
+      border-color: rgba(229, 57, 53, 0.22);
+      box-shadow:
+        0 2px 6px rgba(229, 57, 53, 0.07),
+        0 14px 32px rgba(229, 57, 53, 0.1);
+    }
+    .mover--loser .mover-tag { color: rgba(229, 57, 53, 0.58); }
+    .mover--volume:hover {
+      background: linear-gradient(165deg, #f6f9ff 0%, #eef3ff 100%);
+      border-color: rgba(0, 82, 255, 0.22);
+      box-shadow:
+        0 2px 6px rgba(0, 82, 255, 0.08),
+        0 14px 32px rgba(0, 82, 255, 0.12);
+    }
+    .mover:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 3px;
+    }
+    .mover-inner {
+      flex: 1;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      min-width: 0;
+    }
+    .mover-left { min-width: 0; }
+    .mover-tag-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .mover-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mover-dot--gain {
+      background: var(--gain);
+      box-shadow: 0 0 0 3px rgba(0,158,82,0.14);
+    }
+    .mover-dot--loss {
+      background: var(--loss);
+      box-shadow: 0 0 0 3px rgba(229,57,53,0.12);
+    }
+    .mover-dot--neutral {
+      background: var(--text-3);
+      box-shadow: 0 0 0 3px rgba(160,160,160,0.18);
+    }
+    .mover-dot--volume {
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0, 82, 255, 0.2);
+    }
+    .mover-tag { font-size: 10px; font-weight: 600; letter-spacing: 0.55px; text-transform: uppercase; color: var(--text-3); }
+    .mover-sym { font-size: 17px; font-weight: 700; letter-spacing: -0.35px; line-height: 1.2; }
+    .mover-price { font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--text-2); margin-top: 6px; }
+    .mover-hint { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.45px; color: var(--text-3); margin-top: 8px; }
+    .mover-pct {
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.6px;
+      line-height: 1;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .mover-pct.gain { color: var(--gain); }
+    .mover-pct.loss { color: var(--loss); }
+    .mover-pct--vol {
+      font-size: 19px;
+      color: var(--text);
+      text-align: right;
+    }
+    .mover--volume .mover-tag { color: rgba(0, 82, 255, 0.62); }
+    .mover--volume .mover-pct--vol { color: var(--accent); }
+    .mover--volume .mover-vol-sublabel { color: rgba(0, 82, 255, 0.5); }
+    .mover-vol-sublabel {
+      font-family: var(--sans);
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    /* ── SEARCH (separate from table card) ── */
+    .search-panel {
+      margin-bottom: 20px;
+      max-width: 100%;
+    }
 
     /* ── TABLE SECTION ── */
     .table-section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
     .toolbar {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 12px 16px; border-bottom: 1px solid var(--border); gap: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
     }
-    .toolbar-left { display: flex; align-items: center; gap: 12px; }
+    .toolbar-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
     .tabs { display: flex; gap: 2px; }
     .tab {
       font-size: 13px; font-weight: 500; padding: 5px 13px;
@@ -102,11 +223,52 @@
     .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gain); animation: pulse 2s infinite; display: inline-block; margin-right: 4px; vertical-align: middle; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-    .search-wrap { position: relative; }
-    .search-wrap svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--text-3); width: 14px; height: 14px; pointer-events: none; }
-    .search { padding: 6px 10px 6px 29px; font-size: 13px; font-family: var(--sans); border: 1px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--text); outline: none; width: 170px; transition: border-color 0.12s; }
-    .search:focus { border-color: #c0c0c0; background: #fff; }
-    .search::placeholder { color: var(--text-3); }
+    .search-wrap { width: 100%; }
+    .search-wrap--hero { display: flex; flex-direction: column; gap: 0; align-items: stretch; }
+    /* Icon must be positioned relative to the input row only — not the hint below */
+    .search-field {
+      position: relative;
+      width: 100%;
+    }
+    .search-field svg {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-3);
+      width: 20px;
+      height: 20px;
+      pointer-events: none;
+      display: block;
+      flex-shrink: 0;
+    }
+    .search--hero {
+      width: 100%;
+      min-height: 48px;
+      padding: 12px 16px 12px 48px;
+      font-size: 15px;
+      font-family: var(--sans);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    }
+    .search--hero:focus {
+      border-color: var(--accent);
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(0,82,255,0.14);
+    }
+    .search--hero::placeholder { color: var(--text-3); }
+    .search-hint {
+      font-size: 11px;
+      color: var(--text-3);
+      margin-top: 6px;
+      padding-left: 4px;
+      line-height: 1.4;
+    }
 
     /* ── TABLE ── */
     table { width: 100%; border-collapse: collapse; }
@@ -177,14 +339,11 @@
 
     @media (max-width: 680px) {
       .movers { flex-direction: column; }
+      .mover { min-height: 0; }
       .col-vol, .col-val { display: none; }
       .stats { grid-template-columns: repeat(2,1fr); }
       .stats .stat:nth-child(4n) { border-right: 1px solid var(--border); }
       .stats .stat:nth-child(2n) { border-right: none; }
-      .toolbar { flex-wrap: wrap; gap: 8px; }
-      .toolbar-left { flex: 1 1 100%; }
-      .search-wrap { flex: 1 1 100%; }
-      .search { width: 100%; }
     }
   </style>
 </head>
@@ -340,6 +499,18 @@ function updateLastUpdated() {
   }
 }
 
+function updateSearchHint() {
+  const hint = document.getElementById('search-hint');
+  const searchEl = document.getElementById('search');
+  if (!hint || !searchEl) return;
+  const q = searchEl.value.trim();
+  if (q) {
+    hint.textContent = 'Searching the full market. Clear the field to use All, Gainers, Losers, Top 30, or Watchlist.';
+  } else {
+    hint.textContent = 'Search runs above the table across all symbols. Use tabs in the table to narrow when this is empty. Stars show your watchlist.';
+  }
+}
+
 // ── RENDER FULL PAGE ──
 function renderPage() {
   const page = document.getElementById('page');
@@ -358,32 +529,61 @@ function renderPage() {
   page.innerHTML = `
     <div class="movers">
       ${topGainer ? `
-      <div class="mover" onclick="openDrawer('${topGainer.code}')">
-        <div>
-          <div class="mover-tag">Top Gainer</div>
-          <div class="mover-sym">${topGainer.code}</div>
-          <div class="mover-price">৳ ${topGainer.ltp}</div>
+      <div class="mover mover--gainer" role="button" tabindex="0" onclick="openDrawer('${topGainer.code}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDrawer('${topGainer.code}');}">
+        <div class="mover-inner">
+          <div class="mover-left">
+            <div class="mover-tag-row">
+              <span class="mover-dot mover-dot--gain" aria-hidden="true"></span>
+              <div class="mover-tag">Top gainer</div>
+            </div>
+            <div class="mover-sym">${topGainer.code}</div>
+            <div class="mover-price">৳ ${topGainer.ltp}</div>
+          </div>
+          <div class="mover-pct gain">${sign(topGainer.change)}${topGainer.change.toFixed(2)}%</div>
         </div>
-        <div class="mover-chg gain">${sign(topGainer.change)}${topGainer.change.toFixed(2)}%</div>
       </div>` : ''}
       ${topLoser ? `
-      <div class="mover" onclick="openDrawer('${topLoser.code}')">
-        <div>
-          <div class="mover-tag">Top Loser</div>
-          <div class="mover-sym">${topLoser.code}</div>
-          <div class="mover-price">৳ ${topLoser.ltp}</div>
+      <div class="mover mover--loser" role="button" tabindex="0" onclick="openDrawer('${topLoser.code}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDrawer('${topLoser.code}');}">
+        <div class="mover-inner">
+          <div class="mover-left">
+            <div class="mover-tag-row">
+              <span class="mover-dot mover-dot--loss" aria-hidden="true"></span>
+              <div class="mover-tag">Top loser</div>
+            </div>
+            <div class="mover-sym">${topLoser.code}</div>
+            <div class="mover-price">৳ ${topLoser.ltp}</div>
+          </div>
+          <div class="mover-pct loss">${topLoser.change.toFixed(2)}%</div>
         </div>
-        <div class="mover-chg loss">${topLoser.change.toFixed(2)}%</div>
       </div>` : ''}
       ${mostTraded ? `
-      <div class="mover" onclick="openDrawer('${mostTraded.code}')">
-        <div>
-          <div class="mover-tag">Most Traded</div>
-          <div class="mover-sym">${mostTraded.code}</div>
-          <div class="mover-price">৳ ${mostTraded.value} Mn value</div>
+      <div class="mover mover--volume" role="button" tabindex="0" onclick="openDrawer('${mostTraded.code}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDrawer('${mostTraded.code}');}">
+        <div class="mover-inner">
+          <div class="mover-left">
+            <div class="mover-tag-row">
+              <span class="mover-dot mover-dot--volume" aria-hidden="true"></span>
+              <div class="mover-tag">Most traded</div>
+            </div>
+            <div class="mover-sym">${mostTraded.code}</div>
+            <div class="mover-price">৳ ${mostTraded.value} Mn value</div>
+            <div class="mover-hint">By volume</div>
+          </div>
+          <div>
+            <div class="mover-pct mover-pct--vol">${fmtNum(mostTraded.volume)}</div>
+            <div class="mover-vol-sublabel">Volume</div>
+          </div>
         </div>
-        <div class="mover-chg" style="color:var(--text);font-size:15px">${fmtNum(mostTraded.volume)}<br><span style="font-size:10px;font-weight:500;color:var(--text-2)">vol</span></div>
       </div>` : ''}
+    </div>
+
+    <div class="search-panel">
+      <div class="search-wrap search-wrap--hero">
+        <div class="search-field">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input id="search" class="search--hero" type="search" placeholder="Search all symbols…" autocomplete="off" oninput="renderTable(); updateSearchHint();" />
+        </div>
+        <div class="search-hint" id="search-hint"></div>
+      </div>
     </div>
 
     <div class="table-section">
@@ -397,12 +597,8 @@ function renderPage() {
             <button class="tab${tab === 'top30' ? ' active' : ''}" onclick="setTab(this,'top30')">Top 30 <span class="tab-count" id="cnt-top30">${top30Codes.size}</span></button>
             ${watchlist.length === 0 ? `<button class="tab${tab === 'watchlist' ? ' active' : ''}" onclick="setTab(this,'watchlist')">Watchlist <span class="tab-count" id="cnt-watchlist">0</span></button>` : ''}
           </div>
-          <span class="last-updated" id="last-updated"></span>
         </div>
-        <div class="search-wrap">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <input id="search" class="search" type="text" placeholder="Search symbol…" oninput="renderTable()" />
-        </div>
+        <span class="last-updated" id="last-updated"></span>
       </div>
       <div style="overflow:auto;max-height:530px">
         <table>
@@ -423,18 +619,22 @@ function renderPage() {
   `;
 
   updateLastUpdated();
+  updateSearchHint();
   renderTable();
 }
 
 // ── TABLE ──
 function getData() {
-  let d = [...stocks];
-  if (tab === 'gainers') d = d.filter(s => s.change > 0);
-  else if (tab === 'losers') d = d.filter(s => s.change < 0);
-  else if (tab === 'top30') d = d.filter(s => top30Codes.has(s.code));
-  else if (tab === 'watchlist') d = d.filter(s => watchlist.includes(s.code));
   const q = (document.getElementById('search')?.value || '').trim().toLowerCase();
-  if (q) d = d.filter(s => s.code.toLowerCase().includes(q));
+  let d = [...stocks];
+  if (q) {
+    d = d.filter(s => s.code.toLowerCase().includes(q));
+  } else {
+    if (tab === 'gainers') d = d.filter(s => s.change > 0);
+    else if (tab === 'losers') d = d.filter(s => s.change < 0);
+    else if (tab === 'top30') d = d.filter(s => top30Codes.has(s.code));
+    else if (tab === 'watchlist') d = d.filter(s => watchlist.includes(s.code));
+  }
   if (sort.key) {
     d.sort((a, b) => {
       let va = a[sort.key], vb = b[sort.key];
@@ -450,7 +650,11 @@ function renderTable() {
   if (!tbody) return;
   const data = getData();
   if (!data.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty">${tab === 'watchlist' ? 'Star stocks to add them here' : 'No results'}</td></tr>`;
+    const q = (document.getElementById('search')?.value || '').trim();
+    let msg = 'No results';
+    if (q) msg = 'No symbols match your search';
+    else if (tab === 'watchlist') msg = 'Star stocks to add them here';
+    tbody.innerHTML = `<tr><td colspan="6" class="empty">${msg}</td></tr>`;
     return;
   }
   tbody.innerHTML = data.map(s => {
@@ -473,8 +677,11 @@ function renderTable() {
 
 function setTab(el, t) {
   tab = t;
+  const searchEl = document.getElementById('search');
+  if (searchEl && searchEl.value.trim()) searchEl.value = '';
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
+  updateSearchHint();
   renderTable();
 }
 
