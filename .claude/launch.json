@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mockup",
+      "runtimeExecutable": "/Users/faysalahmed/.nvm/versions/node/v18.17.0/bin/node",
+      "runtimeArgs": ["/Users/faysalahmed/.nvm/versions/node/v18.17.0/bin/live-server", "--port=5555", "--no-browser", "."],
+      "port": 5555
+    }
+  ]
+}

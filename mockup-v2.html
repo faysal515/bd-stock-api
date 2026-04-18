@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DSE Live — Bangladesh Stock Market</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f9fb;
+      --surface: #ffffff;
+      --surface-hover: #f1f3f7;
+      --border: #e5e7ed;
+      --border-light: #f0f1f5;
+      --text: #111827;
+      --text-secondary: #6b7280;
+      --text-tertiary: #9ca3af;
+      --gain: #16a34a;
+      --gain-soft: #f0fdf4;
+      --loss: #dc2626;
+      --loss-soft: #fef2f2;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', -apple-system, system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+    /* Top Bar */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .topbar-brand { font-weight: 800; font-size: 15px; letter-spacing: -0.02em; }
+    .topbar-brand span { color: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 12px; }
+    .topbar-right .pill {
+      font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 100px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .topbar-right .pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+    .topbar-right .status {
+      font-size: 11px; color: var(--text-tertiary); display: flex; align-items: center; gap: 6px;
+    }
+    .topbar-right .status .live-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--gain);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Layout */
+    .app { max-width: 1200px; margin: 0 auto; padding: 20px 24px 60px; }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 2px; margin-bottom: 16px; }
+    .tab-btn {
+      font-family: var(--sans); font-size: 13px; font-weight: 600;
+      color: var(--text-tertiary); background: none; border: none;
+      padding: 8px 16px; border-radius: var(--radius-sm);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .tab-btn:hover { color: var(--text-secondary); background: var(--surface-hover); }
+    .tab-btn.active { color: var(--text); background: var(--surface); box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .tab-btn .count {
+      font-family: var(--mono); font-size: 11px;
+      background: var(--border-light); padding: 1px 6px;
+      border-radius: 100px; margin-left: 4px; color: var(--text-tertiary);
+    }
+
+    /* Search */
+    .search-bar { position: relative; margin-bottom: 16px; }
+    .search-bar input {
+      width: 100%; max-width: 320px;
+      font-family: var(--sans); font-size: 13px;
+      padding: 9px 12px 9px 36px;
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      background: var(--surface); color: var(--text); outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .search-bar input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
+    .search-bar input::placeholder { color: var(--text-tertiary); }
+    .search-bar svg {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      width: 16px; height: 16px; color: var(--text-tertiary);
+    }
+
+    /* Stock Table */
+    .stock-table {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); overflow: hidden;
+    }
+    .stock-table table { width: 100%; border-collapse: collapse; }
+    .stock-table thead th {
+      font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+      text-transform: uppercase; letter-spacing: 0.04em;
+      text-align: left; padding: 10px 16px;
+      border-bottom: 1px solid var(--border-light);
+      cursor: pointer; user-select: none; white-space: nowrap;
+      transition: color 0.15s;
+    }
+    .stock-table thead th:hover { color: var(--text-secondary); }
+    .stock-table thead th.right { text-align: right; }
+    .stock-table tbody tr {
+      cursor: pointer; transition: background 0.1s;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .stock-table tbody tr:last-child { border-bottom: none; }
+    .stock-table tbody tr:hover { background: var(--surface-hover); }
+    .stock-table tbody tr.selected { background: var(--accent-soft); }
+    .stock-table tbody td { padding: 10px 16px; font-size: 13px; white-space: nowrap; }
+    .stock-table tbody td.right { text-align: right; }
+    .stock-table tbody td .symbol { font-weight: 600; }
+    .stock-table tbody td .bookmark-btn {
+      background: none; border: none; cursor: pointer;
+      color: var(--text-tertiary); font-size: 14px;
+      padding: 2px; margin-right: 6px; vertical-align: middle;
+      transition: color 0.15s; line-height: 1;
+    }
+    .stock-table tbody td .bookmark-btn:hover { color: var(--accent); }
+    .stock-table tbody td .bookmark-btn.bookmarked { color: var(--accent); }
+    .chg-up { color: var(--gain); }
+    .chg-down { color: var(--loss); }
+    .chg-flat { color: var(--text-tertiary); }
+
+    /* Detail Panel */
+    .detail-panel {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-top: 16px;
+      overflow: hidden; display: none;
+    }
+    .detail-panel.open { display: block; }
+    .detail-header {
+      padding: 20px 24px 16px; border-bottom: 1px solid var(--border-light);
+      display: flex; justify-content: space-between; align-items: flex-start;
+    }
+    .detail-header h2 { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+    .detail-header .subtitle { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+    .detail-price { display: flex; align-items: baseline; gap: 10px; margin-top: 8px; }
+    .detail-price .ltp { font-family: var(--mono); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+    .detail-price .change { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+    .detail-close-btn {
+      background: none; border: none; color: var(--text-tertiary);
+      cursor: pointer; padding: 4px; border-radius: 6px; transition: all 0.15s;
+    }
+    .detail-close-btn:hover { color: var(--text); background: var(--surface-hover); }
+
+    /* Change bar */
+    .change-bar-wrap { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .change-bar { flex: 1; max-width: 200px; height: 6px; border-radius: 3px; background: var(--border-light); overflow: hidden; }
+    .change-bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+
+    /* Chart */
+    .chart-section { padding: 16px 24px; }
+    .chart-range { display: flex; gap: 2px; margin-bottom: 12px; }
+    .chart-range button {
+      font-family: var(--sans); font-size: 12px; font-weight: 500;
+      color: var(--text-tertiary); background: none; border: none;
+      padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+    }
+    .chart-range button:hover { color: var(--text-secondary); background: var(--surface-hover); }
+    .chart-range button.active { color: var(--accent); background: var(--accent-soft); }
+    .chart-container { height: 220px; position: relative; }
+    .chart-loading { display: flex; align-items: center; justify-content: center; height: 220px; color: var(--text-tertiary); font-size: 13px; }
+    .chart-empty { display: flex; align-items: center; justify-content: center; height: 220px; color: var(--text-tertiary); font-size: 13px; }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1px; background: var(--border-light); border-top: 1px solid var(--border-light);
+    }
+    .stat-item { background: var(--surface); padding: 14px 16px; }
+    .stat-item .stat-label { font-size: 11px; color: var(--text-tertiary); font-weight: 500; margin-bottom: 4px; }
+    .stat-item .stat-value { font-family: var(--mono); font-size: 14px; font-weight: 600; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--text-tertiary); }
+    .empty-state .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+    .empty-state p { font-size: 13px; max-width: 260px; margin: 0 auto; line-height: 1.6; }
+
+    .loading { text-align: center; padding: 40px; color: var(--text-tertiary); font-size: 13px; }
+
+    .table-scroll { overflow-x: auto; max-height: 520px; overflow-y: auto; }
+    .table-scroll thead th { position: sticky; top: 0; background: var(--surface); z-index: 2; }
+    .table-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+    .table-scroll::-webkit-scrollbar-track { background: var(--border-light); }
+    .table-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+    @media (max-width: 768px) {
+      .topbar-right .pill { display: none; }
+      .app { padding: 12px 12px 40px; }
+      .detail-header { padding: 16px; }
+      .chart-section { padding: 12px 16px; }
+      .stat-item { padding: 10px 12px; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-brand">DSE<span>.</span>live</div>
+  <div class="topbar-right">
+    <div class="pill" style="background:var(--gain-soft);color:var(--gain);">
+      <span class="dot" style="background:var(--gain);"></span> <span id="count-up">—</span> up
+    </div>
+    <div class="pill" style="background:var(--loss-soft);color:var(--loss);">
+      <span class="dot" style="background:var(--loss);"></span> <span id="count-down">—</span> down
+    </div>
+    <div class="pill" style="background:var(--border-light);color:var(--text-tertiary);">
+      <span id="count-flat">—</span> flat
+    </div>
+    <div class="status">
+      <span class="live-dot"></span>
+      <span id="last-update">Loading…</span>
+    </div>
+  </div>
+</header>
+
+<main class="app">
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('latest',this)">All Stocks</button>
+    <button class="tab-btn" onclick="switchTab('top30',this)">DSE 30</button>
+    <button class="tab-btn" onclick="switchTab('watchlist',this)">Watchlist <span class="count" id="watchlist-count">0</span></button>
+  </div>
+
+  <div class="search-bar">
+    <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="searchInput" placeholder="Search symbol…" oninput="renderTable()">
+  </div>
+
+  <div id="tableContainer">
+    <div class="loading" id="loadingEl">Loading market data…</div>
+  </div>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <div style="flex:1;">
+        <h2 id="dSymbol"></h2>
+        <div class="subtitle">Dhaka Stock Exchange</div>
+        <div class="detail-price">
+          <span class="ltp" id="dLtp"></span>
+          <span class="change" id="dChange"></span>
+        </div>
+        <div class="change-bar-wrap">
+          <div class="change-bar"><div class="change-bar-fill" id="dBar"></div></div>
+          <span class="num" style="font-size:12px;color:var(--text-tertiary);" id="dAbsChange"></span>
+        </div>
+      </div>
+      <button class="detail-close-btn" onclick="closeDetail()">
+        <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-range" id="chartRangeBtns">
+        <button onclick="setChartRange(this,7)">1W</button>
+        <button class="active" onclick="setChartRange(this,30)">1M</button>
+        <button onclick="setChartRange(this,90)">3M</button>
+        <button onclick="setChartRange(this,180)">6M</button>
+      </div>
+      <div class="chart-container" id="chartWrap">
+        <canvas id="chartCanvas"></canvas>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-label">Open</div><div class="stat-value" id="dOpen"></div></div>
+      <div class="stat-item"><div class="stat-label">Day High</div><div class="stat-value chg-up" id="dHigh"></div></div>
+      <div class="stat-item"><div class="stat-label">Day Low</div><div class="stat-value chg-down" id="dLow"></div></div>
+      <div class="stat-item"><div class="stat-label">Previous Close</div><div class="stat-value" id="dYcp"></div></div>
+      <div class="stat-item"><div class="stat-label">Trades</div><div class="stat-value" id="dTrades"></div></div>
+      <div class="stat-item"><div class="stat-label">Volume</div><div class="stat-value" id="dVolume"></div></div>
+      <div class="stat-item"><div class="stat-label">Value (Tk Mn)</div><div class="stat-value" id="dValue"></div></div>
+    </div>
+  </div>
+
+  <div class="empty-state" id="emptyState" style="display:none;">
+    <div class="empty-icon">&#9734;</div>
+    <p>Your watchlist is empty. Click the star next to any stock to track it.</p>
+  </div>
+</main>
+
+<script>
+const API = 'http://localhost:3000/v1/dse';
+let watchlist = JSON.parse(localStorage.getItem('dse_watchlist') || '[]');
+let currentTab = 'latest';
+let sortKey = null;
+let sortAsc = true;
+let selectedStock = null;
+let selectedStockData = null;
+let allStocks = [];
+let chartInstance = null;
+let chartRange = 30;
+
+function cleanNum(val) {
+  if (!val) return 0;
+  return parseFloat(String(val).replace(/,/g, '')) || 0;
+}
+
+async function fetchJSON(url) {
+  try {
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.success && json.data) return json.data;
+    return [];
+  } catch (e) {
+    console.error('API error:', e);
+    return [];
+  }
+}
+
+async function loadMarket() {
+  const [latest, dsexdata, top30] = await Promise.all([
+    fetchJSON(API + '/latest'),
+    fetchJSON(API + '/dsexdata'),
+    fetchJSON(API + '/top30'),
+  ]);
+
+  const dsexMap = {};
+  dsexdata.forEach(s => { dsexMap[s['TRADING CODE']] = s; });
+
+  allStocks = latest.map(s => {
+    const code = s['TRADING CODE'];
+    const dsex = dsexMap[code] || {};
+    return {
+      code,
+      ltp: cleanNum(s['LTP*']),
+      high: cleanNum(s['HIGH']),
+      low: cleanNum(s['LOW']),
+      close: cleanNum(s['CLOSEP*']),
+      ycp: cleanNum(s['YCP*']),
+      absChange: cleanNum(s['CHANGE']),
+      pctChange: dsex['% CHANGE'] != null ? cleanNum(dsex['% CHANGE']) : (s['YCP*'] ? ((cleanNum(s['LTP*']) - cleanNum(s['YCP*'])) / cleanNum(s['YCP*']) * 100) : 0),
+      trade: cleanNum(s['TRADE']),
+      value: cleanNum(s['VALUE (mn)']),
+      volume: cleanNum(s['VOLUME']),
+      isTop30: top30.some(t => t['TRADING CODE'] === code),
+    };
+  });
+
+  let up = 0, down = 0, flat = 0;
+  allStocks.forEach(s => {
+    if (s.absChange > 0) up++;
+    else if (s.absChange < 0) down++;
+    else flat++;
+  });
+  document.getElementById('count-up').textContent = up;
+  document.getElementById('count-down').textContent = down;
+  document.getElementById('count-flat').textContent = flat;
+  document.getElementById('last-update').textContent = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+
+  renderTable();
+}
+
+function saveWatchlist() {
+  localStorage.setItem('dse_watchlist', JSON.stringify(watchlist));
+  document.getElementById('watchlist-count').textContent = watchlist.length;
+}
+
+function toggleBookmark(code, e) {
+  e.stopPropagation();
+  const i = watchlist.indexOf(code);
+  if (i >= 0) watchlist.splice(i, 1); else watchlist.push(code);
+  saveWatchlist();
+  renderTable();
+}
+
+function fmtNum(n) {
+  if (n >= 1e6) return (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return (n/1e3).toFixed(1) + 'K';
+  return n.toLocaleString('en-US');
+}
+
+function fmtPrice(n) { return '\u09F3' + n.toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }); }
+function fmtPct(pct) { return (pct > 0 ? '+' : '') + pct.toFixed(2) + '%'; }
+
+function getFilteredStocks() {
+  let data = [...allStocks];
+  if (currentTab === 'top30') data = data.filter(s => s.isTop30);
+  else if (currentTab === 'watchlist') data = data.filter(s => watchlist.includes(s.code));
+
+  const q = document.getElementById('searchInput').value.toUpperCase().trim();
+  if (q) data = data.filter(s => s.code.includes(q));
+
+  if (sortKey) {
+    data.sort((a, b) => {
+      if (sortKey === 'code') return sortAsc ? a.code.localeCompare(b.code) : b.code.localeCompare(a.code);
+      return sortAsc ? a[sortKey] - b[sortKey] : b[sortKey] - a[sortKey];
+    });
+  } else {
+    data.sort((a, b) => b.volume - a.volume);
+  }
+  return data;
+}
+
+function renderTable() {
+  const container = document.getElementById('tableContainer');
+  const data = getFilteredStocks();
+  const emptyEl = document.getElementById('emptyState');
+
+  if (data.length === 0 && currentTab === 'watchlist') {
+    emptyEl.style.display = 'block';
+    container.innerHTML = '';
+    return;
+  } else {
+    emptyEl.style.display = 'none';
+  }
+
+  const rows = data.map(s => {
+    const isUp = s.absChange > 0;
+    const chgClass = isUp ? 'chg-up' : s.absChange < 0 ? 'chg-down' : 'chg-flat';
+    const starred = watchlist.includes(s.code);
+    const sel = selectedStock === s.code ? 'selected' : '';
+    return '<tr class="' + sel + '" onclick="openDetail(\'' + s.code + '\')">' +
+      '<td><button class="bookmark-btn ' + (starred ? 'bookmarked' : '') + '" onclick="toggleBookmark(\'' + s.code + '\',event)">' + (starred ? '&#9733;' : '&#9734;') + '</button></td>' +
+      '<td><span class="symbol">' + s.code + '</span></td>' +
+      '<td class="right num">' + fmtPrice(s.ltp) + '</td>' +
+      '<td class="right num ' + chgClass + '">' + fmtPct(s.pctChange) + '</td>' +
+      '<td class="right num" style="color:var(--text-secondary)">' + fmtNum(s.volume) + '</td>' +
+      '<td class="right num" style="color:var(--text-secondary)">' + s.value.toFixed(2) + '</td>' +
+      '<td class="right num" style="color:var(--text-secondary)">' + s.trade.toLocaleString() + '</td></tr>';
+  }).join('');
+
+  container.innerHTML =
+    '<div class="stock-table"><div class="table-scroll"><table>' +
+    '<thead><tr>' +
+    '<th style="width:36px;"></th>' +
+    '<th onclick="sortBy(\'code\')">Symbol</th>' +
+    '<th class="right" onclick="sortBy(\'ltp\')">LTP</th>' +
+    '<th class="right" onclick="sortBy(\'pctChange\')">Change</th>' +
+    '<th class="right" onclick="sortBy(\'volume\')">Volume</th>' +
+    '<th class="right" onclick="sortBy(\'value\')">Value (Tk Mn)</th>' +
+    '<th class="right" onclick="sortBy(\'trade\')">Trades</th>' +
+    '</tr></thead><tbody>' + rows + '</tbody></table></div></div>';
+}
+
+async function openDetail(code) {
+  const s = allStocks.find(x => x.code === code);
+  if (!s) return;
+  selectedStock = code;
+  selectedStockData = s;
+
+  const isUp = s.absChange > 0;
+  const chgClass = isUp ? 'chg-up' : s.absChange < 0 ? 'chg-down' : 'chg-flat';
+
+  document.getElementById('dSymbol').textContent = s.code;
+  document.getElementById('dLtp').textContent = fmtPrice(s.ltp);
+
+  const chgEl = document.getElementById('dChange');
+  chgEl.textContent = fmtPct(s.pctChange);
+  chgEl.className = 'change num ' + chgClass;
+
+  document.getElementById('dAbsChange').textContent = (s.absChange > 0 ? '+' : '') + s.absChange.toFixed(1);
+
+  const barPct = Math.min(Math.abs(s.pctChange) / 10 * 100, 100);
+  const bar = document.getElementById('dBar');
+  bar.style.width = barPct + '%';
+  bar.style.background = isUp ? 'var(--gain)' : s.absChange < 0 ? 'var(--loss)' : 'var(--text-tertiary)';
+
+  document.getElementById('dHigh').textContent = fmtPrice(s.high);
+  document.getElementById('dLow').textContent = fmtPrice(s.low);
+  document.getElementById('dYcp').textContent = fmtPrice(s.ycp);
+  document.getElementById('dTrades').textContent = s.trade.toLocaleString();
+  document.getElementById('dVolume').textContent = fmtNum(s.volume);
+  document.getElementById('dValue').textContent = s.value.toFixed(2);
+
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('detailPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderTable();
+
+  // Load historical chart
+  await loadChart(code, chartRange);
+}
+
+async function loadChart(code, days) {
+  const wrap = document.getElementById('chartWrap');
+  wrap.innerHTML = '<div class="chart-loading">Loading chart…</div>';
+
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - days);
+
+  const startStr = start.toISOString().split('T')[0];
+  const endStr = end.toISOString().split('T')[0];
+
+  const data = await fetchJSON(API + '/historical?start=' + startStr + '&end=' + endStr + '&code=' + encodeURIComponent(code));
+
+  // Check for empty data (DSE returns {"#":"No Day End Data",...})
+  if (!data.length || (data.length === 1 && !data[0]['DATE'])) {
+    wrap.innerHTML = '<div class="chart-empty">No historical data available for this period</div>';
+    return;
+  }
+
+  // Sort by date ascending
+  data.sort((a, b) => a['DATE'].localeCompare(b['DATE']));
+
+  const labels = data.map(d => {
+    const dt = new Date(d['DATE']);
+    return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  });
+  const prices = data.map(d => cleanNum(d['LTP*']));
+  const isUp = prices[prices.length - 1] >= prices[0];
+  const lineColor = isUp ? '#16a34a' : '#dc2626';
+
+  // Update open price from most recent historical data
+  if (selectedStockData && data.length > 0) {
+    const latest = data[data.length - 1];
+    selectedStockData.open = cleanNum(latest['OPENP*']);
+    document.getElementById('dOpen').textContent = fmtPrice(selectedStockData.open);
+  }
+
+  wrap.innerHTML = '<canvas id="chartCanvas"></canvas>';
+
+  if (chartInstance) chartInstance.destroy();
+  const ctx = document.getElementById('chartCanvas').getContext('2d');
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: prices,
+        borderColor: lineColor,
+        backgroundColor: isUp ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.06)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.35,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: lineColor,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: 'index' },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1f2937',
+          titleFont: { family: "'Inter',sans-serif", size: 11 },
+          bodyFont: { family: "'JetBrains Mono',monospace", size: 12 },
+          padding: 10, cornerRadius: 8,
+          callbacks: { label: ctx => '\u09F3 ' + ctx.parsed.y.toFixed(1) }
+        }
+      },
+      scales: {
+        x: {
+          display: true, grid: { display: false },
+          ticks: { font: { family: "'Inter',sans-serif", size: 10 }, color: '#9ca3af', maxTicksLimit: 8, maxRotation: 0 }
+        },
+        y: {
+          grid: { color: '#f3f4f6', drawBorder: false },
+          ticks: { font: { family: "'JetBrains Mono',monospace", size: 10 }, color: '#9ca3af', callback: v => '\u09F3' + v.toFixed(0), maxTicksLimit: 5 },
+          border: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function setChartRange(btn, days) {
+  chartRange = days;
+  document.querySelectorAll('.chart-range button').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (selectedStock) loadChart(selectedStock, days);
+}
+
+function closeDetail() {
+  selectedStock = null;
+  selectedStockData = null;
+  document.getElementById('detailPanel').classList.remove('open');
+  if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+  renderTable();
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortAsc = !sortAsc;
+  else { sortKey = key; sortAsc = key === 'code'; }
+  renderTable();
+}
+
+function switchTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderTable();
+}
+
+document.getElementById('watchlist-count').textContent = watchlist.length;
+loadMarket();
+</script>
+</body>
+</html>

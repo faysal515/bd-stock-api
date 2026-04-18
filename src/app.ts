@@ -21,6 +21,9 @@ const expressApp = createExpressServer({
   middlewares: [GlobalErrorHandler],
 });
 
+// Serve frontend
+app.use(express.static('public'));
+
 // Use the routing-controllers app as middleware in the express app
 app.use(expressApp);
 
