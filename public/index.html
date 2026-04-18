@@ -249,19 +249,33 @@ function pct(change, ycp) {
   if (!y) return 0;
   return +((c / y) * 100).toFixed(2);
 }
-function dateStr(d) {
-  return d.toISOString().split('T')[0];
+function toYMD(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
 }
-function rangeStart(range) {
+/** Chart window: calendar months back from today (local date) */
+function startDateForChartRange(kind) {
   const d = new Date();
-  if (range === '1M') d.setDate(d.getDate() - 30);
-  else if (range === '3M') d.setDate(d.getDate() - 90);
-  else d.setDate(d.getDate() - 180);
-  return dateStr(d);
+  if (kind === '1M') d.setMonth(d.getMonth() - 1);
+  else if (kind === '3M') d.setMonth(d.getMonth() - 3);
+  else d.setMonth(d.getMonth() - 6);
+  return toYMD(d);
+}
+function normalizeChartRange(kind) {
+  return kind === '3M' || kind === '6M' ? kind : '1M';
+}
+function periodTone(pct) {
+  const eps = 1e-6;
+  if (pct > eps) return 'gain';
+  if (pct < -eps) return 'loss';
+  return 'flat';
 }
 
 // ── STATE ──
 let stocks = [];
+let top30Codes = new Set();
 let tab = 'all';
 let sort = { key: null, asc: true };
 let activeCode = null;
@@ -295,11 +309,21 @@ function normalize(raw) {
 // ── FETCH MARKET DATA ──
 async function loadMarket() {
   try {
-    const res = await fetch('/v1/dse/latest');
-    const json = await res.json();
-    // Filter out footer rows (no valid TRADING CODE)
-    stocks = json.data
-      .filter(r => r['TRADING CODE'] && /^[A-Z0-9]/.test(r['TRADING CODE']))
+    const [latestRes, top30Res] = await Promise.all([
+      fetch('/v1/dse/latest'),
+      fetch('/v1/dse/top30')
+    ]);
+    const latestJson = await latestRes.json();
+    top30Codes = new Set();
+    if (top30Res.ok) {
+      const top30Json = await top30Res.json();
+      (top30Json.data || [])
+        .filter(r => r['TRADING CODE'])
+        .forEach(r => top30Codes.add(r['TRADING CODE']));
+    }
+    // Filter out footer rows and invalid symbols
+    stocks = (latestJson.data || [])
+      .filter(r => r['TRADING CODE'] && /^[A-Z0-9().&-]+$/.test(r['TRADING CODE']) && r['LTP*'] !== '')
       .map(normalize);
     renderPage();
     updateLastUpdated();
@@ -370,6 +394,7 @@ function renderPage() {
             <button class="tab${tab === 'all' ? ' active' : ''}" onclick="setTab(this,'all')">All <span class="tab-count" id="cnt-all">${stocks.length}</span></button>
             <button class="tab${tab === 'gainers' ? ' active' : ''}" onclick="setTab(this,'gainers')">Gainers <span class="tab-count" id="cnt-gainers">${gainers.length}</span></button>
             <button class="tab${tab === 'losers' ? ' active' : ''}" onclick="setTab(this,'losers')">Losers <span class="tab-count" id="cnt-losers">${losers.length}</span></button>
+            <button class="tab${tab === 'top30' ? ' active' : ''}" onclick="setTab(this,'top30')">Top 30 <span class="tab-count" id="cnt-top30">${top30Codes.size}</span></button>
             ${watchlist.length === 0 ? `<button class="tab${tab === 'watchlist' ? ' active' : ''}" onclick="setTab(this,'watchlist')">Watchlist <span class="tab-count" id="cnt-watchlist">0</span></button>` : ''}
           </div>
           <span class="last-updated" id="last-updated"></span>
@@ -406,6 +431,7 @@ function getData() {
   let d = [...stocks];
   if (tab === 'gainers') d = d.filter(s => s.change > 0);
   else if (tab === 'losers') d = d.filter(s => s.change < 0);
+  else if (tab === 'top30') d = d.filter(s => top30Codes.has(s.code));
   else if (tab === 'watchlist') d = d.filter(s => watchlist.includes(s.code));
   const q = (document.getElementById('search')?.value || '').trim().toLowerCase();
   if (q) d = d.filter(s => s.code.toLowerCase().includes(q));
@@ -519,8 +545,9 @@ async function loadChart(code, range) {
   area.innerHTML = '<div class="chart-loading">Loading chart…</div>';
   if (chartInst) { chartInst.destroy(); chartInst = null; }
 
-  const end = dateStr(new Date());
-  const start = rangeStart(range);
+  const rangeKey = normalizeChartRange(range);
+  const end = toYMD(new Date());
+  const start = startDateForChartRange(rangeKey);
 
   try {
     const res = await fetch(`/v1/dse/historical?code=${code}&start=${start}&end=${end}`);
@@ -543,15 +570,15 @@ async function loadChart(code, range) {
     const firstPrice = prices[0];
     const lastPrice  = prices[prices.length - 1];
     const periodChg  = firstPrice ? +((lastPrice - firstPrice) / firstPrice * 100).toFixed(2) : 0;
-    const isGain = lastPrice >= firstPrice;
-    const color = isGain ? '#009e52' : '#e53935';
-    const bg    = isGain ? 'rgba(0,158,82,0.06)' : 'rgba(229,57,53,0.06)';
+    const tone = periodTone(periodChg);
+    const color = tone === 'gain' ? '#009e52' : tone === 'loss' ? '#e53935' : '#6b6b6b';
+    const bg    = tone === 'gain' ? 'rgba(0,158,82,0.06)' : tone === 'loss' ? 'rgba(229,57,53,0.06)' : 'rgba(107,107,107,0.06)';
 
-    // Update drawer header to reflect period change
+    // Update drawer header to reflect period change (matches chart coloring)
     const chgEl = document.getElementById('d-chg');
     if (chgEl) {
       chgEl.textContent = (periodChg > 0 ? '+' : '') + periodChg + '%';
-      chgEl.className = 'd-chg ' + (isGain ? 'gain' : 'loss');
+      chgEl.className = 'd-chg ' + tone;
     }
 
     area.innerHTML = '<div class="chart-wrap"><canvas id="chart"></canvas></div>';
