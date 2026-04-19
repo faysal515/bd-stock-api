@@ -97,14 +97,27 @@
       align-items: center;
       line-height: 1;
       text-decoration: none;
+      color: var(--text);
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.45px;
+      border-radius: 8px;
+      padding: 6px 8px;
+      margin: -6px -8px;
+      transition: color 0.15s ease;
     }
 
-    .logo img {
-      display: block;
-      height: 40px;
-      width: auto;
-      max-width: min(240px, 68vw);
-      object-fit: contain;
+    .logo:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .logo-stock {
+      color: var(--accent);
+    }
+
+    .logo:hover .logo-stock {
+      filter: brightness(0.92);
     }
 
     /* ── PAGE ── */
@@ -832,6 +845,11 @@
         flex-direction: column;
       }
 
+      .logo {
+        font-size: 17px;
+        letter-spacing: -0.35px;
+      }
+
       .mover {
         min-height: 0;
       }
@@ -859,8 +877,8 @@
 <body>
 
   <nav>
-    <a class="logo" href="/" aria-label="BDStock.org home">
-      <img src="/logo.jpg" alt="BDStock.org" />
+    <a class="logo" href="/" aria-label="bdstock.org home">
+      <span class="logo-bd">bd</span><span class="logo-stock">stock</span><span class="logo-org">.org</span>
     </a>
   </nav>
 
@@ -1342,15 +1360,15 @@
               legend: { display: false },
               tooltip: {
                 backgroundColor: '#111',
-                titleFont: { family: 'Inter', size: 11 },
-                bodyFont: { family: 'JetBrains Mono', size: 13, weight: '600' },
+                titleFont: { family: 'Manrope', size: 11 },
+                bodyFont: { family: 'IBM Plex Mono', size: 13, weight: '600' },
                 padding: 10,
                 callbacks: { label: c => '  ৳ ' + c.parsed.y.toFixed(2) }
               }
             },
             scales: {
-              x: { display: true, grid: { display: false }, border: { display: false }, ticks: { font: { family: 'Inter', size: 11 }, color: '#a0a0a0', maxTicksLimit: 5, maxRotation: 0 } },
-              y: { position: 'right', grid: { color: '#f0f0f0' }, border: { display: false }, ticks: { font: { family: 'JetBrains Mono', size: 11 }, color: '#a0a0a0', callback: v => '৳' + v } }
+              x: { display: true, grid: { display: false }, border: { display: false }, ticks: { font: { family: 'Manrope', size: 11 }, color: '#a0a0a0', maxTicksLimit: 5, maxRotation: 0 } },
+              y: { position: 'right', grid: { color: '#f0f0f0' }, border: { display: false }, ticks: { font: { family: 'IBM Plex Mono', size: 11 }, color: '#a0a0a0', callback: v => '৳' + v } }
             }
           }
         });
