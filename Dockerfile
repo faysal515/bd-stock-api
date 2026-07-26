@@ -37,6 +37,9 @@ ENV NODE_ENV=production
 ENV PORT=4000
 ENV DSE_BASE_URL="https://dsebd.org"
 
+# Relax verification globally so the scraper can fetch prices.
+ENV NODE_TLS_REJECT_UNAUTHORIZED=0
+
 # Expose the application port
 EXPOSE 4000
 
