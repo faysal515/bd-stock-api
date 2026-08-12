@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --watch",
     "start-server": "node --max-old-space-size=4096 --enable-source-maps dist/src/app.js",
-    "dev": "tsc-watch --noClear --onSuccess 'npm run start-server'",
+    "dev": "tsc-watch --noClear --onSuccess \"npm run start-server\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
