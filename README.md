@@ -1,3 +1,5 @@
+
+
 # Bangladesh Stock Market Data API - 
 
 This is an unofficial api which crawls data from dsebd. Please report issue if data not coming in. I'll try to lookup.
@@ -30,10 +32,10 @@ This is an unofficial api which crawls data from dsebd. Please report issue if d
 ### 4. Historical Stock Data
 - **Endpoint:** `GET /v1/dse/historical`
 - **Description:** Obtains historical data for stocks.
-- **Required Parameters:**
-  - `start` (string): Start date for the historical data.
-  - `end` (string): End date for the historical data.
-  - `code` (string): Specific instrument code.
+- **Parameters:**
+  - `start` (string, required): Start date for the historical data.
+  - `end` (string, required): End date for the historical data.
+  - `code` (string, optional): Specific instrument code (defaults to `All Instrument`).
   
 
 ## Data Fields Description
@@ -48,4 +50,3 @@ This is an unofficial api which crawls data from dsebd. Please report issue if d
 - `TRADE`: Total number of trades for the stock.
 - `VALUE (mn)`: Total monetary value of all trades in millions.
 - `VOLUME`: The total number of shares that were traded.
-
